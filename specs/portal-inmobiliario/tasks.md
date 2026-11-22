@@ -4,7 +4,7 @@
 
 ## Fase 1 — Fundamentos
 
-- [ ] **Paso 1 — Crear proyecto Next.js**
+- [x] **Paso 1 — Crear proyecto Next.js**
   - Crear proyecto con React y TypeScript.
   - Configurar estructura básica.
   - Crear `.env.example`.
