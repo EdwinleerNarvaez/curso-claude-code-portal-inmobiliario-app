@@ -1,6 +1,6 @@
 # Dependencias
-/node_modules
-/.pnp
+node_modules/
+.pnp
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -8,18 +8,21 @@
 !.yarn/releases
 !.yarn/versions
 
+# Turborepo
+.turbo/
+
 # Cliente de Prisma generado
-/src/generated/
+**/src/generated/
 
 # Testing
-/coverage
+coverage/
 
 # Next.js
-/.next/
-/out/
+.next/
+out/
 
 # Build
-/build
+build/
 dist/
 
 # Logs
@@ -38,7 +41,7 @@ yarn-error.log*
 Thumbs.db
 *.pem
 
-# Variables de entorno (se versiona solo la plantilla)
+# Variables de entorno (se versionan solo las plantillas)
 .env*
 !.env.example
 !.env.pgadmin.example

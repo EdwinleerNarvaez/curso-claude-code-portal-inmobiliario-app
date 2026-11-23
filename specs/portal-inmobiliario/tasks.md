@@ -51,6 +51,15 @@
   - Secciones comprar y arrendar.
   - Llamadas a la acción.
 
+- [x] **Paso 7.1 — Reestructurar a monorepo**
+  - npm workspaces + Turborepo.
+  - `apps/web`: frontend Next.js (puerto 3000).
+  - `apps/api`: backend Next.js con API REST, Prisma y PostgreSQL (puerto 3001).
+  - `packages/shared`: tipos de dominio y esquemas Zod.
+  - Proxy `/api/*` de web a api mediante rewrites.
+  - Variables de entorno separadas por aplicación.
+  - Mantener funcionando todo lo implementado en los pasos 1 a 7.
+
 - [ ] **Paso 8 — PropertyCard y grid responsive**
   - Crear componente reutilizable.
   - Imagen, título, precio, operación, ubicación, dormitorios, baños y superficie.

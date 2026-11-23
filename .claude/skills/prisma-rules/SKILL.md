@@ -1,6 +1,6 @@
 ---
 name: prisma-rules
-description: Convenciones de persistencia del Portal Inmobiliario con Prisma 7 y PostgreSQL. Usar al crear o modificar modelos en prisma/schema.prisma, migraciones, el seed, repositorios en src/repositories o cualquier código que consulte la base de datos.
+description: Convenciones de persistencia del Portal Inmobiliario con Prisma 7 y PostgreSQL. Usar al crear o modificar modelos en apps/api/prisma/schema.prisma, migraciones, el seed, repositorios en apps/api/src/repositories o cualquier código que consulte la base de datos.
 ---
 
 # Skill: prisma-rules
@@ -10,10 +10,10 @@ Reglas para trabajar con la base de datos del proyecto. Complementan `spec.md`, 
 ## Activation Triggers
 
 Usar este skill cuando el usuario o la tarea actual:
-- Cree, modifique o elimine modelos, enums o relaciones en `prisma/schema.prisma`.
+- Cree, modifique o elimine modelos, enums o relaciones en `apps/api/prisma/schema.prisma`.
 - Cree o aplique migraciones.
 - Cree o modifique el seed de desarrollo.
-- Cree o modifique repositorios en `src/repositories/`.
+- Cree o modifique repositorios en `apps/api/src/repositories/`.
 - Escriba consultas, filtros, ordenamientos o transacciones contra PostgreSQL.
 
 ---
@@ -21,9 +21,9 @@ Usar este skill cuando el usuario o la tarea actual:
 ## Stack y configuración (no cambiar sin aprobación)
 
 - **Prisma 7.10.x** con PostgreSQL 16 (contenedor Docker en el puerto 5433).
-- Configuración en `prisma.config.ts`: ruta del esquema, carpeta de migraciones y `datasource.url`. Carga `.env.local` con `@next/env`.
-- El bloque `datasource` de `schema.prisma` **no** lleva `url`; la URL vive en `prisma.config.ts`.
-- Generador `prisma-client` con salida en `src/generated/prisma` (ignorado por git y ESLint; se regenera con `npm install` o `npm run db:generate`).
+- Configuración en `apps/api/prisma.config.ts`: ruta del esquema, carpeta de migraciones y `datasource.url`. Carga `apps/api/.env.local` con `@next/env`.
+- El bloque `datasource` de `schema.prisma` **no** lleva `url`; la URL vive en `apps/api/prisma.config.ts`.
+- Generador `prisma-client` con salida en `apps/api/src/generated/prisma` (ignorado por git y ESLint; se regenera con `npm install` o `npm run db:generate`).
 - Conexión mediante el adaptador `@prisma/adapter-pg`.
 - Importar el cliente generado desde `@/generated/prisma/client`.
 - Antes de usar una API de Prisma que no aparezca en este proyecto, verificar su firma en `node_modules/@prisma/` o en el cliente generado: Prisma 7 tiene cambios incompatibles con versiones anteriores.
@@ -31,14 +31,15 @@ Usar este skill cuando el usuario o la tarea actual:
 ## Arquitectura
 
 ```text
-Route Handler (src/app/api/**) → Servicio (src/services) → Repositorio (src/repositories) → Prisma → PostgreSQL
+Route Handler (apps/api/src/app/api/**) → Servicio (apps/api/src/services) → Repositorio (apps/api/src/repositories) → Prisma → PostgreSQL
 ```
 
-- **Solo `src/repositories/` usa Prisma.** Route Handlers, servicios y componentes no importan `@/generated/prisma` ni `prisma-client`.
-- Obtener el cliente con `getPrismaClient()` de `src/repositories/prisma-client.ts`. No crear otras instancias de `PrismaClient`.
+- **Prisma vive solo en `apps/api`.** `apps/web` y `packages/shared` nunca lo importan.
+- **Dentro de `apps/api`, solo `apps/api/src/repositories/` usa Prisma.** Route Handlers, servicios y componentes no importan `@/generated/prisma` ni `prisma-client`.
+- Obtener el cliente con `getPrismaClient()` de `apps/api/src/repositories/prisma-client.ts`. No crear otras instancias de `PrismaClient`.
 - Todo archivo que use el cliente importa `server-only` (directamente o a través de `prisma-client.ts`).
 - Prohibido usar Prisma en componentes de React (cliente o servidor) y en Server Actions.
-- Los repositorios devuelven tipos de dominio definidos en `src/types/`, no tipos generados por Prisma. Convertir `Decimal` y otros tipos especiales en el repositorio.
+- Los repositorios devuelven tipos de dominio definidos en `@portal/shared/types` (`packages/shared/src/types/`), no tipos generados por Prisma. Convertir `Decimal` y otros tipos especiales en el repositorio.
 - Los repositorios no contienen reglas de negocio ni lógica de presentación: solo persistencia y mapeo.
 - Para poder probarlos, los repositorios reciben el cliente como dependencia (o un tipo mínimo, como `DatabaseQueryClient` en `database-health-repository.ts`) en lugar de importarlo de forma fija cuando la lógica lo justifique.
 
@@ -81,7 +82,7 @@ Route Handler (src/app/api/**) → Servicio (src/services) → Repositorio (src/
 - Toda modificación del esquema se hace con migraciones. **No usar `prisma db push`.**
 - Crear y aplicar en desarrollo: `npm run db:migrate -- --name nombre_descriptivo_en_snake_case`.
 - Estado: `npm run db:migrate:status`. Producción o CI: `npm run db:migrate:deploy`.
-- Versionar la carpeta `prisma/migrations/` completa, incluido `migration_lock.toml`.
+- Versionar la carpeta `apps/api/prisma/migrations/` completa, incluido `migration_lock.toml`.
 - No editar ni eliminar migraciones ya aplicadas; corregir con una migración nueva.
 - Revisar el SQL generado antes de dar por terminada la tarea, en especial si elimina columnas o tablas.
 - El usuario `portal_inmobiliario` tiene permiso `CREATEDB` porque `migrate dev` necesita crear una base temporal (shadow database).
@@ -105,7 +106,7 @@ Route Handler (src/app/api/**) → Servicio (src/services) → Repositorio (src/
 
 ## Seed
 
-- Archivo `prisma/seed.ts`, ejecutado con `tsx` y registrado en `migrations.seed` de `prisma.config.ts`.
+- Archivo `apps/api/prisma/seed.ts`, ejecutado con `tsx` y registrado en `migrations.seed` de `apps/api/prisma.config.ts`.
 - Debe ser idempotente (`upsert` o limpieza previa controlada) y usar datos realistas del mercado chileno.
 - Nunca incluir contraseñas reales; las de usuarios de prueba se guardan con hash.
 
@@ -113,4 +114,4 @@ Route Handler (src/app/api/**) → Servicio (src/services) → Repositorio (src/
 
 - Cada repositorio nuevo tiene pruebas unitarias con un cliente falso que cumpla el tipo mínimo que recibe.
 - Probar el mapeo a tipos de dominio, los filtros construidos y el manejo de errores.
-- Validar la conexión real con `npm run db:check` y las migraciones con `npm run db:migrate:status`.
+- Validar la conexión real con `npm run db:check` y las migraciones con `npm run db:migrate:status` (desde la raíz se delegan a `apps/api`).
