@@ -4,24 +4,24 @@
 
 ## Fase 1 — Fundamentos
 
-- [ ] **Paso 1 — Crear proyecto Next.js**
+- [x] **Paso 1 — Crear proyecto Next.js**
   - Crear proyecto con React y TypeScript.
   - Configurar estructura básica.
   - Crear `.env.example`.
   - Validar servidor de desarrollo y build.
 
-- [ ] **Paso 2 — Layout y navegación**
+- [x] **Paso 2 — Layout y navegación**
   - Crear header, navegación, footer y layout.
   - Agregar diseño responsive base.
   - Navegación: Inicio, Propiedades, Comprar, Arrendar, Ingresar.
 
-- [ ] **Paso 3 — Configurar PostgreSQL**
+- [x] **Paso 3 — Configurar PostgreSQL**
   - Configurar PostgreSQL.
   - Seleccionar y configurar ORM.
   - Configurar migraciones.
   - Validar conexión.
 
-- [ ] **Paso 4 — Crear modelo de dominio**
+- [x] **Paso 4 — Crear modelo de dominio**
   - User.
   - Property.
   - PropertyImage.
@@ -31,25 +31,34 @@
   - Crear relaciones y constraints.
   - Ejecutar migraciones.
 
-- [ ] **Paso 5 — Crear seed**
+- [x] **Paso 5 — Crear seed**
   - Propiedades realistas de venta y arriendo.
   - Casas, departamentos, terrenos y oficinas.
   - Diferentes comunas, precios y características.
 
 ## Fase 2 — Portal público
 
-- [ ] **Paso 6 — API REST pública de propiedades**
+- [x] **Paso 6 — API REST pública de propiedades**
   - `GET /api/properties`.
   - `GET /api/properties/{id}`.
   - Mostrar públicamente solo propiedades publicadas.
   - Separar API, servicios y persistencia.
 
-- [ ] **Paso 7 — Landing page**
+- [x] **Paso 7 — Landing page**
   - Hero.
   - Buscador.
   - Propiedades destacadas.
   - Secciones comprar y arrendar.
   - Llamadas a la acción.
+
+- [x] **Paso 7.1 — Reestructurar a monorepo**
+  - npm workspaces + Turborepo.
+  - `apps/web`: frontend Next.js (puerto 3000).
+  - `apps/api`: backend Next.js con API REST, Prisma y PostgreSQL (puerto 3001).
+  - `packages/shared`: tipos de dominio y esquemas Zod.
+  - Proxy `/api/*` de web a api mediante rewrites.
+  - Variables de entorno separadas por aplicación.
+  - Mantener funcionando todo lo implementado en los pasos 1 a 7.
 
 - [ ] **Paso 8 — PropertyCard y grid responsive**
   - Crear componente reutilizable.

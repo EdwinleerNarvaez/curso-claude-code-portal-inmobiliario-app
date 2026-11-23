@@ -1,0 +1,26 @@
+{
+  "name": "@portal/shared",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tipos de dominio y esquemas Zod compartidos entre @portal/web y @portal/api.",
+  "type": "module",
+  "exports": {
+    "./types/*": "./src/types/*.ts",
+    "./schemas/*": "./src/schemas/*.ts"
+  },
+  "scripts": {
+    "lint": "eslint",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "eslint": "^9",
+    "typescript": "^5",
+    "typescript-eslint": "^8",
+    "vitest": "^5.1.1"
+  }
+}

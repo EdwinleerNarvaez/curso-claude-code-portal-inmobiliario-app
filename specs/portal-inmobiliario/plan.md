@@ -2,15 +2,15 @@
 
 ## 1. Arquitectura
 
-Next.js se utilizará como framework full stack manteniendo una arquitectura REST clara.
+Se utilizan dos aplicaciones Next.js en un monorepo (sección 4): `apps/web` para el frontend y `apps/api` para el backend REST.
 
 ```text
-Next.js + React
+apps/web (Next.js + React)
       │
-    fetch()
+    fetch("/api/...")  →  rewrites  →
       │
       ▼
-API REST /api/**
+apps/api: API REST /api/**
       │
       ▼
 Capa de servicios
@@ -49,25 +49,55 @@ Web3Forms   → contacto
 - No exigir latitud/longitud en el formulario ADMIN.
 - No implementar funcionalidades especulativas fuera de `spec.md`.
 
-## 4. Estructura sugerida
+## 4. Estructura: monorepo
+
+El proyecto es un monorepo con **npm workspaces** y **Turborepo**. Frontend y backend son dos aplicaciones Next.js independientes que comparten solo un paquete de tipos y esquemas.
 
 ```text
-src/
-├── app/
-│   ├── api/
-│   ├── admin/
-│   ├── account/
-│   ├── properties/
-│   └── ...
-├── components/
-├── services/
-├── repositories/
-├── lib/
-├── types/
-└── ...
+portal-inmobiliario/
+├── apps/
+│   ├── web/                 @portal/web — frontend Next.js (puerto 3000)
+│   │   └── src/
+│   │       ├── app/         páginas: /, /properties, /account, /admin, ...
+│   │       ├── components/
+│   │       ├── hooks/
+│   │       └── lib/         cliente REST, formateadores, utilidades de UI
+│   └── api/                 @portal/api — backend Next.js (puerto 3001)
+│       ├── prisma/          esquema, migraciones y seed
+│       ├── scripts/
+│       └── src/
+│           ├── app/api/     Route Handlers REST (/api/**)
+│           ├── services/
+│           ├── repositories/
+│           └── lib/         respuestas HTTP, errores, integraciones
+├── packages/
+│   └── shared/              @portal/shared — tipos de dominio y esquemas Zod
+├── docker/
+├── specs/
+├── package.json             workspaces y scripts raíz
+└── turbo.json
 ```
 
-Adaptar cuando las convenciones actuales de Next.js lo justifiquen sin romper la separación de responsabilidades.
+### Reglas del monorepo
+
+- `apps/web` nunca importa código de `apps/api`, y `apps/api` nunca importa código de `apps/web`.
+- Ambas aplicaciones pueden importar `@portal/shared`.
+- `@portal/shared` no depende de Next.js, React, Prisma ni de variables de entorno: solo TypeScript y Zod.
+- PostgreSQL, Prisma, Cloudinary (credenciales), Web3Forms y los secretos de autenticación viven **solo** en `apps/api`.
+- `apps/api` no tiene páginas de interfaz: solo expone la API REST.
+- `apps/web` no accede a la base de datos ni a secretos del servidor.
+- Cada aplicación tiene su propio `.env.local` y su `.env.example`.
+
+### Comunicación entre aplicaciones
+
+- El navegador llama siempre a `/api/...` en el mismo dominio del frontend.
+- `apps/web` reenvía `/api/:path*` al backend mediante `rewrites` de Next.js, usando la variable de servidor `API_URL` (por defecto `http://localhost:3001`).
+- Así no se requiere CORS y las cookies de sesión `httpOnly` (sección 10) quedan asociadas al dominio del frontend.
+- Cuando un componente de servidor de `apps/web` necesite datos (por ejemplo, metadata SEO), consulta el backend directamente con `API_URL`.
+
+### Comandos raíz
+
+Turborepo ejecuta las tareas en todos los workspaces: `npm run dev`, `npm run build`, `npm test`, `npm run lint` y `npm run typecheck`. Los comandos de base de datos (`db:*`) se delegan a `apps/api`.
 
 ## 5. Modelo de datos
 
@@ -312,7 +342,10 @@ Utilizar variables de entorno para:
 - configuración Google Maps;
 - clave Web3Forms.
 
-Crear `.env.example` sin secretos reales.
+Crear `.env.example` sin secretos reales en cada aplicación:
+
+- `apps/api/.env.example`: PostgreSQL, autenticación, Cloudinary y Web3Forms.
+- `apps/web/.env.example`: `API_URL` (servidor) y configuración pública de Google Maps (`NEXT_PUBLIC_*`).
 
 ## 16. Validación
 
