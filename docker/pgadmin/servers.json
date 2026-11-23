@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "Portal Inmobiliario",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "portal_inmobiliario",
+      "Username": "portal_inmobiliario",
+      "SSLMode": "prefer"
+    }
+  }
+}

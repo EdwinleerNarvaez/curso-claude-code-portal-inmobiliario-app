@@ -1,9 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
+  images: {
+    // Las imágenes de propiedades se sirven desde Cloudinary (spec.md, sección 5).
+    remotePatterns: [new URL("https://res.cloudinary.com/**")],
+  },
   turbopack: {
     rules: {
       "*.css": {
