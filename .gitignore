@@ -52,3 +52,8 @@ Thumbs.db
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# Copias que genera `npx skills` para otros agentes. Las skills de Claude Code
+# se versionan en .claude/skills/ y su origen queda en skills-lock.json.
+.agents/
+.aider-desk/
